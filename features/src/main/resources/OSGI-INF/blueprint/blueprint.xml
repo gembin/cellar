@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <!-- Cluster Configuration Listener -->
+    <bean id="featuresListener" class="net.cellar.features.LocalFeaturesListener"  init-method="init" destroy-method="destroy">
+        <property name="featuresService" ref="featuresService"/>
+        <property name="producer" ref="eventProducer"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+
+    <!-- Features/Repositories Synchronizer -->
+    <bean id="synchronizer" class="net.cellar.features.FeaturesSynchronizer"
+          init-method="init" destroy-method="destroy">
+        <property name="featuresService" ref="featuresService"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="producer" ref="eventProducer"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+
+    <!-- Features Handler -->
+    <bean id="featuresHandler" class="net.cellar.features.FeaturesEventHandler"
+          init-method="init" destroy-method="destroy">
+        <property name="featuresService" ref="featuresService"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+
+    <!-- Repository Handler -->
+    <bean id="repositoryHandler" class="net.cellar.features.RepositoryEventHandler"
+          init-method="init" destroy-method="destroy">
+        <property name="featuresService" ref="featuresService"/>
+        <property name="clusterManager" ref="clusterManager"/>
+    </bean>
+
+    <!-- OSGi Services  & References -->
+    <service ref="featuresListener" interface="org.apache.karaf.features.FeaturesListener"/>
+    <service ref="featuresHandler" interface="net.cellar.core.event.EventHandler">
+        <service-properties>
+            <entry key="managed" value="true"/>
+         </service-properties>
+    </service>
+    <service ref="repositoryHandler" interface="net.cellar.core.event.EventHandler"/>
+    <reference id="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <reference id="eventProducer" interface="net.cellar.core.event.EventProducer"/>
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+
+</blueprint>

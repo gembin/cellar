@@ -1,0 +1,111 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+       http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+
+
+    <!-- Hazelcast hazelcast -->
+    <bean id="hazelcast" class="com.hazelcast.core.Hazelcast" factory-method="newHazelcastInstance" destroy-method="shutdown">
+        <constructor-arg ref="config"/>
+    </bean>
+
+    <!-- Cluster Manager -->
+    <bean id="clusterManager" class="net.cellar.hazelcast.HazelcastClusterManager">
+        <property name="instance" ref="hazelcast"/>
+    </bean>
+
+    <!-- Hazelcast Cluster and Node -->
+    <bean id="node" factory-bean="clusterManager" factory-method="getNode"/>
+
+    <!-- The distributed topic -->
+    <bean id="eventTopic" factory-bean="hazelcast" factory-method="getTopic">
+        <constructor-arg value="net.cellar.event.topic"/>
+    </bean>
+
+    <!-- Consumer -->
+    <bean id="consumer" class="net.cellar.hazelcast.TopicConsumer" init-method="init"
+          destroy-method="destroy">
+        <property name="topic" ref="eventTopic"/>
+        <property name="dispatcher" ref="dispatcher"/>
+        <property name="node" ref="node"/>
+    </bean>
+
+    <!-- Producer -->
+    <bean id="producer" class="net.cellar.hazelcast.TopicProducer">
+        <property name="topic" ref="eventTopic"/>
+        <property name="node" ref="node"/>
+    </bean>
+
+    <bean id="executionContext" class="net.cellar.core.command.ClusteredExecutionContext">
+        <property name="producer" ref="producer"/>
+        <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+
+    <!-- Producer Switch Handler -->
+    <bean id="producerSwitchCommandHandler" class="net.cellar.core.control.ProducerSwitchCommandHandler">
+        <property name="producer" ref="producer"/>
+    </bean>
+
+    <bean id="producerSwitchResultHandler" class="net.cellar.core.control.ProducerSwitchResultHandler">
+       <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+    <!-- Consumer Switch Event Handler -->
+    <bean id="consumerSwitchCommandHandler" class="net.cellar.core.control.ConsumerSwitchCommandHandler">
+        <property name="producer" ref="producer"/>
+        <property name="consumer" ref="consumer"/>
+    </bean>
+
+    <bean id="consumerSwitchResultHandler" class="net.cellar.core.control.ConsumerSwitchResultHandler">
+        <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+    <!-- Managed Handlers Command Handlers -->
+    <bean id="manageHandlersCommandHandler" class="net.cellar.core.control.ManageHandlersCommandHandler">
+        <property name="producer" ref="producer"/>
+    </bean>
+
+    <bean id="manageHandlersResultHandler" class="net.cellar.core.control.ManageHandlersResultHandler">
+        <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+    <!-- Command Store -->
+    <bean id="commandStore" class="net.cellar.core.command.CommandStore"/>
+
+
+    <bean id="dispatcher" class="net.cellar.core.event.EventHandlerServiceRegistryDispatcher" init-method="init">
+        <property name="handlerRegistry" ref="registry"/>
+    </bean>
+
+    <!-- Registry -->
+    <bean id="registry" class="net.cellar.core.event.EventHandlerServiceRegistry"/>
+
+    <!-- Hazelcast Config -->
+    <bean id="config" class="com.hazelcast.config.Config">
+        <property name="groupConfig" ref="groupConfig"/>
+    </bean>
+
+    <bean id="groupConfig" class="com.hazelcast.config.GroupConfig">
+        <property name="name" value="dev"/>
+        <property name="password" value="pwd"/>
+    </bean>
+
+    <!-- Hazelcast Instance Service-->
+    <osgi:service ref="hazelcast" interface="com.hazelcast.core.HazelcastInstance"/>
+    <osgi:service ref="producer" interface="net.cellar.core.event.EventProducer"/>
+    <osgi:service ref="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <osgi:service ref="executionContext" interface="net.cellar.core.command.ExecutionContext"/>
+
+    <!-- Event Handler Service -->
+    <osgi:service ref="consumerSwitchCommandHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="consumerSwitchResultHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="producerSwitchCommandHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="producerSwitchResultHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="manageHandlersCommandHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="manageHandlersResultHandler" interface="net.cellar.core.event.EventHandler"/>
+
+</beans>

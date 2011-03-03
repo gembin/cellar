@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features>
+    <repository>mvn:org.apache.karaf.assemblies.features/standard/${karaf.version}/xml/features</repository>
+
+    <feature name='hazelcast' description='In memory data grid' version='${hazelcast.version}' resolver='(obr)'>
+        <bundle>mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
+    </feature>
+
+    <feature name='hazelcast-monitor' description='Hazelcast console' version='${hazelcast.version}' resolver='(obr)'>
+        <feature version="${hazelcast.version}">hazelcast</feature>
+         <bundle>webbundle:mvn:com.hazelcast/hazelcast-monitor/${hazelcast.version}/war</bundle>
+    </feature>
+
+    <feature name='cellar' description='Karaf clustering' version='${project.version}' resolver='(obr)'>
+        <feature version="${hazelcast.version}">hazelcast</feature>
+        <feature version="${springdm.version}">spring-dm</feature>
+        <bundle>mvn:net.cellar/core/${project.version}</bundle>
+        <bundle>mvn:net.cellar/config/${project.version}</bundle>
+        <bundle>mvn:net.cellar/features/${project.version}</bundle>
+        <bundle>mvn:net.cellar/shell/${project.version}</bundle>
+        <bundle>mvn:net.cellar/hazelcast/${project.version}</bundle>
+        <config name="net.cellar.configuration">
+           net.cellar.configuration=FULL
+           net.cellar.features=FULL
+        </config>
+        <config name="net.cellar.features">
+           hazelcast=FULL
+           cellar=FULL
+           ssh=FULL
+        </config>
+    </feature>
+</features>
