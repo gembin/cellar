@@ -30,8 +30,7 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
 					ServiceReference ref = references[i];
 					try {
 						EventHandler handler = (EventHandler) bundleContext.getService(ref);
-						//TODO: Find a more sophisticated way of implementing this.
-						if (handler.getType().toString().equals(event.getClass().toString())) {
+						if (handler.getType().equals(event.getClass())) {
 							return handler;
 						}
 					} catch (Exception ex) {
