@@ -20,6 +20,7 @@
             net.cellar.core*;version=${project.version},
             net.cellar.config*;version=${project.version},
             net.cellar.features*;version=${project.version},
+            net.cellar.utils*;version=${project.version},
             org.apache.karaf.shell.console*;version="[2,4)",
             *
         </osgi.import>
@@ -44,6 +45,11 @@
         <dependency>
             <groupId>net.cellar</groupId>
             <artifactId>features</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.cellar</groupId>
+            <artifactId>utils</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- Logging Dependencies -->

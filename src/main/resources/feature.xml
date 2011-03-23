@@ -15,9 +15,9 @@
         <feature version="${hazelcast.version}">hazelcast</feature>
         <feature version="${springdm.version}">spring-dm</feature>
         <bundle>mvn:net.cellar/core/${project.version}</bundle>
-        <bundle>mvn:net.cellar/utils/${project.version}</bundle>
         <bundle>mvn:net.cellar/config/${project.version}</bundle>
         <bundle>mvn:net.cellar/features/${project.version}</bundle>
+        <bundle>mvn:net.cellar/utils/${project.version}</bundle>
         <bundle>mvn:net.cellar/shell/${project.version}</bundle>
         <bundle>mvn:net.cellar/hazelcast/${project.version}</bundle>
         <config name="net.cellar.configuration">

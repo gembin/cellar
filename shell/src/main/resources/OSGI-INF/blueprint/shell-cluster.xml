@@ -10,6 +10,13 @@
             </action>
         </command>
 
+        <command name="cluster/ping">
+            <action class="net.cellar.shell.PingCommand">
+              <property name="clusterManager" ref="clusterManager"/>
+              <property name="executionContext" ref="executionContext"/>
+            </action>
+        </command>
+
         <command name="cluster/consume">
             <action class="net.cellar.shell.ConsumeCommand">
               <property name="clusterManager" ref="clusterManager"/>

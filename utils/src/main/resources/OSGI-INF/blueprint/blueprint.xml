@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="pingHandler" class="net.cellar.utils.ping.PingHandler">
+       <property name="producer" ref="producer"/>
+
+    </bean>
+
+    <bean id="pongHandler" class="net.cellar.utils.ping.PongHandler">
+       <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+    <!-- OSGi Services  & References -->
+    <service ref="pingHandler" interface="net.cellar.core.event.EventHandler"/>
+    <service ref="pongHandler" interface="net.cellar.core.event.EventHandler"/>
+    <reference id="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <reference id="eventProducer" interface="net.cellar.core.event.EventProducer"/>
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference id="commandStore" interface="net.cellar.core.command.CommandStore"/>
+    <reference id="producer" interface="net.cellar.core.event.EventProducer"/>
+</blueprint>

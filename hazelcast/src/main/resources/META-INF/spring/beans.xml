@@ -44,7 +44,6 @@
         <property name="commandStore" ref="commandStore"/>
     </bean>
 
-
     <!-- Producer Switch Handler -->
     <bean id="producerSwitchCommandHandler" class="net.cellar.core.control.ProducerSwitchCommandHandler">
         <property name="producer" ref="producer"/>
@@ -74,7 +73,7 @@
     </bean>
 
     <!-- Command Store -->
-    <bean id="commandStore" class="net.cellar.core.command.CommandStore"/>
+    <bean id="commandStore" class="net.cellar.core.command.BasicCommandStore"/>
 
 
     <bean id="dispatcher" class="net.cellar.core.event.EventHandlerServiceRegistryDispatcher" init-method="init">
@@ -99,6 +98,7 @@
     <osgi:service ref="producer" interface="net.cellar.core.event.EventProducer"/>
     <osgi:service ref="clusterManager" interface="net.cellar.core.ClusterManager"/>
     <osgi:service ref="executionContext" interface="net.cellar.core.command.ExecutionContext"/>
+    <osgi:service ref="commandStore" interface="net.cellar.core.command.CommandStore"/>
 
     <!-- Event Handler Service -->
     <osgi:service ref="consumerSwitchCommandHandler" interface="net.cellar.core.event.EventHandler"/>

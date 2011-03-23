@@ -17,7 +17,6 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
 
     private static final Logger logger = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
 
-
     public static final String SWITCH_ID = "net.cellar.command.listhandlers.switch";
 
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
