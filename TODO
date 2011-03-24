@@ -1,0 +1,5 @@
+1. The synchronization should happen using the JOIN event. Now it happens upon initialization which is wrong.
+2. Some kind of web cosnole needs to be added. 
+   a) To C.R.U.D. the content of the shared resouce(e.g configuration, feature repositories, features).
+   b) To display the status of each node (Handler status, producer status, consumer status).
+   c) To edit the blacklist/whitelist for each module.
