@@ -1,0 +1,19 @@
+Cellar
+--------
+1. Requirements
+
+Karaf: 2.x
+Java: 1.6
+Maven 2.2.1 or above.
+
+2. Build instructions
+Just mvn clean install
+
+3. Installation instructions
+From inside the Karaf shell:
+
+features:addurl mvn:net.cellar/assembly/1.0/xml/features
+features:install spring-dm
+features:install cellar
+
+
