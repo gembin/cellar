@@ -7,13 +7,28 @@ Java: 1.6
 Maven 2.2.1 or above.
 
 2. Build instructions
-Just mvn clean install
+Cellar requires the hazelcast trunk to work (it can works with the latest release 1.9.1 but it will lack some features like the web console).
+
+#svn checkout http://hazelcast.googlecode.com/svn/trunk/ hazelcast
+#cd hazelcast
+#mvn clean install
+
+and now you download % can build cellar:
+
+#git clone git@github.com:iocanel/cellar.git cellar
+#cd cellar
+#mvn clean install
 
 3. Installation instructions
 From inside the Karaf shell:
 
-features:addurl mvn:net.cellar/assembly/1.0/xml/features
-features:install spring-dm
-features:install cellar
+karaf@root>features:addurl mvn:net.cellar/assembly/1.0/xml/features
+karaf@root>features:install spring-dm
+karaf@root>features:install cellar
 
 
+4. Testing the installation
+karaf@root>cluster:list
+The above will list all the nodes that currently participate to the cluster.
+
+You can read more at http://iocanel.blogspot.com/2011/03/karaf-clustering-using-hazelcast.html
