@@ -21,16 +21,16 @@ public class HandlersCommand extends OsgiCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-7s %s";
 
-	private ClusterManager clusterManager;
-	private ExecutionContext executionContext;
+    private ClusterManager clusterManager;
+    private ExecutionContext executionContext;
 
-	@Argument(index = 0, name = "node", description = "The id of the node(s) to turn on/off event producer", required = false, multiValued = true)
+    @Argument(index = 0, name = "node", description = "The id of the node(s) to turn on/off event producer", required = false, multiValued = true)
     List<String> nodes;
 
-	@Option(name = "-on", aliases = "--turn-on", description = "Turns on event producer", required = false, multiValued = false)
+    @Option(name = "-on", aliases = "--turn-on", description = "Turns on event producer", required = false, multiValued = false)
     boolean on;
 
-	@Option(name = "-off", aliases = "--turn-off", description = "Turns off event producer", required = false, multiValued = false)
+    @Option(name = "-off", aliases = "--turn-off", description = "Turns off event producer", required = false, multiValued = false)
     boolean off;
 
     @Option(name = "-h", aliases = "--handler", description = "The class name of the handler.", required = false, multiValued = true)
@@ -55,7 +55,7 @@ public class HandlersCommand extends OsgiCommandSupport {
         //Set the name of the handler.
         if (handler != null && handler.length() > 2) {
             handler = handler.substring(1);
-            handler = handler.substring(0,handler.length() -1);
+            handler = handler.substring(0, handler.length() - 1);
             command.setHandlesName(handler);
             if (on) {
                 command.setStatus(true);
@@ -65,19 +65,17 @@ public class HandlersCommand extends OsgiCommandSupport {
         }
 
 
-        executionContext.execute(command);
-
-        Map<Node, ManageHandlersResult> results = command.getResult();
+        Map<Node, ManageHandlersResult> results = executionContext.execute(command);
         if (results == null || results.isEmpty()) {
             System.out.println("No result received within given timeout");
         } else {
-            System.out.println(String.format(OUTPUT_FORMAT, "Node","Status", "Event Handler" ));
+            System.out.println(String.format(OUTPUT_FORMAT, "Node", "Status", "Event Handler"));
             for (Node node : results.keySet()) {
                 ManageHandlersResult result = results.get(node);
                 if (result != null && result.getHandlers() != null) {
-                    for(String handler : result.getHandlers().keySet()) {
-                       String status = result.getHandlers().get(handler);
-                       System.out.println(String.format(OUTPUT_FORMAT, node.getId(),status, handler));
+                    for (String handler : result.getHandlers().keySet()) {
+                        String status = result.getHandlers().get(handler);
+                        System.out.println(String.format(OUTPUT_FORMAT, node.getId(), status, handler));
                     }
                 }
             }

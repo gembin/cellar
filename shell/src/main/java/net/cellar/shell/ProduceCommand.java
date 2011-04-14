@@ -20,64 +20,64 @@ import java.util.Map;
 @Command(scope = "cluster", name = "produce", description = "Turns on/off the producer capabilities of a node.")
 public class ProduceCommand extends OsgiCommandSupport {
 
-	@Argument(index = 0, name = "node", description = "The id of the node(s) to turn on/off event producer", required = true, multiValued = true)
-	List<String> nodes;
+    @Argument(index = 0, name = "node", description = "The id of the node(s) to turn on/off event producer", required = true, multiValued = true)
+    List<String> nodes;
 
-	@Option(name = "-on", aliases = "--turn-on", description = "Turns on event producer", required = false, multiValued = false)
+    @Option(name = "-on", aliases = "--turn-on", description = "Turns on event producer", required = false, multiValued = false)
     boolean on;
 
-	@Option(name = "-off", aliases = "--turn-off", description = "Turns off event producer", required = false, multiValued = false)
+    @Option(name = "-off", aliases = "--turn-off", description = "Turns off event producer", required = false, multiValued = false)
     boolean off;
 
-	private static final String OUTPUT_FORMAT = "%-20s %s";
+    private static final String OUTPUT_FORMAT = "%-20s %s";
 
     private ClusterManager clusterManager;
-	private ExecutionContext executionContext;
+    private ExecutionContext executionContext;
 
-	/**
-	 * Execut the command.
-	 * @return
-	 * @throws Exception
-	 */
+    /**
+     * Execut the command.
+     *
+     * @return
+     * @throws Exception
+     */
     @Override
-	protected Object doExecute() throws Exception {
-	    ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
-		if(on) {
-			command.setStatus(SwitchStatus.ON);
-			executionContext.execute(command);
-		} else if(off) {
-		  command.setStatus(SwitchStatus.OFF);
-		  executionContext.execute(command);
-		} else {
-			return null;
-		}
+    protected Object doExecute() throws Exception {
+        ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
 
-	    Map<Node,ProducerSwitchResult> results = command.getResult();
-	    if(results == null || results.isEmpty()) {
-		    System.out.println("No result received within given timeout");
-	    } else {
-            System.out.println(String.format(OUTPUT_FORMAT,"Node","Success"));
-            for(Node node:results.keySet()) {
-               ProducerSwitchResult result = results.get(node);
-               System.out.println(String.format(OUTPUT_FORMAT,node.getId(),result.getSucess()));
+        if (on) {
+            command.setStatus(SwitchStatus.ON);
+        } else if (off) {
+            command.setStatus(SwitchStatus.OFF);
+        } else {
+            command.setStatus(null);
+        }
+
+        Map<Node, ProducerSwitchResult> results = executionContext.execute(command);
+        if (results == null || results.isEmpty()) {
+            System.out.println("No result received within given timeout");
+        } else {
+            System.out.println(String.format(OUTPUT_FORMAT, "Node", "Status"));
+            for (Node node : results.keySet()) {
+                ProducerSwitchResult result = results.get(node);
+                System.out.println(String.format(OUTPUT_FORMAT, node.getId(), result.getStatus()));
             }
         }
-	    return null;
-	}
+        return null;
+    }
 
-	public ClusterManager getClusterManager() {
-		return clusterManager;
-	}
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
 
-	public void setClusterManager(ClusterManager clusterManager) {
-		this.clusterManager = clusterManager;
-	}
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
 
-	public ExecutionContext getExecutionContext() {
-		return executionContext;
-	}
+    public ExecutionContext getExecutionContext() {
+        return executionContext;
+    }
 
-	public void setExecutionContext(ExecutionContext executionContext) {
-		this.executionContext = executionContext;
-	}
+    public void setExecutionContext(ExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
 }

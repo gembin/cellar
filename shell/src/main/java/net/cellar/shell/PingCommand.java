@@ -9,7 +9,6 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author iocanel
@@ -21,10 +20,10 @@ public class PingCommand extends OsgiCommandSupport {
     String nodeId;
 
     @Argument(index = 1, name = "iterations", description = "The number of iterations to perform", required = false, multiValued = false)
-    Integer iterations=10;
+    Integer iterations = 10;
 
     @Argument(index = 2, name = "interval", description = "The time in millis to wait between iterations", required = false, multiValued = false)
-    Long interval=1000L;
+    Long interval = 1000L;
 
     private ClusterManager clusterManager;
     private ExecutionContext executionContext;
@@ -32,15 +31,15 @@ public class PingCommand extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         Node node = clusterManager.getNode(nodeId);
-        System.out.println("Pinging node :"+node.getId());
-        for(int i=1;i<=iterations;i++) {
+        System.out.println("Pinging node :" + node.getId());
+        for (int i = 1; i <= iterations; i++) {
             Long start = System.currentTimeMillis();
             Ping ping = new Ping(clusterManager.generateId());
             ping.setDestination(Arrays.asList(node));
             executionContext.execute(ping);
             Long stop = System.currentTimeMillis();
             Long delay = stop - start;
-            System.out.println(String.format("PING %s %s %sms",i,node.getId(),delay));
+            System.out.println(String.format("PING %s %s %sms", i, node.getId(), delay));
             Thread.sleep(interval);
         }
         return null;
