@@ -7,7 +7,12 @@ import net.cellar.core.event.Event;
  */
 public class Result extends Event {
 
-	public Result(String id) {
-		super(id);
-	}
+    public Result(String id) {
+        super(id);
+    }
+
+    @Override
+    public Boolean getBypassSwitches() {
+        return true;
+    }
 }

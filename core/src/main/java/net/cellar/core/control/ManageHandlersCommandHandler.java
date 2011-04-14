@@ -46,14 +46,16 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                             handler.getSwitch().turnOn();
                         } else handler.getSwitch().turnOff();
                     }
-                    result.getHandlers().put(handler.getClass().getName(),handler.getSwitch().getStatus().name());
+                    result.getHandlers().put(handler.getClass().getName(), handler.getSwitch().getStatus().name());
                 }
             }
         } catch (InvalidSyntaxException e) {
             logger.error("Syntax error looking up service {} using filter {}", EventHandler.class.getName(), EventHandler.MANAGED_FILTER);
         } finally {
-            for (ServiceReference ref : references) {
-                bundleContext.ungetService(ref);
+            if (references != null) {
+                for (ServiceReference ref : references) {
+                    bundleContext.ungetService(ref);
+                }
             }
         }
         return result;

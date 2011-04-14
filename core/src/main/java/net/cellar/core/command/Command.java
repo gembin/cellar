@@ -18,13 +18,18 @@ public class Command<R extends Result> extends Event {
 
     protected static final Logger logger = LoggerFactory.getLogger(Command.class);
 
-	protected long timeout = 10000;
-	protected final BlockingQueue<Map<Node,R>> resultQueue = new LinkedBlockingQueue<Map<Node,R>>();
-    protected final Map<Node,R> nodeResults = new HashMap<Node,R>();
+    protected long timeout = 10000;
+    protected final BlockingQueue<Map<Node, R>> resultQueue = new LinkedBlockingQueue<Map<Node, R>>();
+    protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
 
-	public Command(String id) {
-		super(id);
-	}
+    public Command(String id) {
+        super(id);
+    }
+
+    @Override
+    public Boolean getBypassSwitches() {
+        return true;
+    }
 
 
     /**
@@ -38,46 +43,47 @@ public class Command<R extends Result> extends Event {
         }
     }
 
-	/**
-	 * Adds {@code Results} to the result queue.
-	 * @param results
-	 */
-	public void addResults(R ...results) {
-	  if(results != null && results.length > 0) {
-		  for(R result: results) {
-			  nodeResults.put(result.getSource(),result);
-		  }
+    /**
+     * Adds {@code Results} to the result queue.
+     *
+     * @param results
+     */
+    public void addResults(R... results) {
+        if (results != null && results.length > 0) {
+            for (R result : results) {
+                nodeResults.put(result.getSource(), result);
+            }
 
-          if(getDestination() == null || (nodeResults.size() == getDestination().size())) {
-              try {
-                  resultQueue.put(nodeResults);
-              } catch (InterruptedException e) {
-                 logger.error("Error adding result to result queue",e);
-              }
-          }
-	  }
-	}
+            if (getDestination() == null || (nodeResults.size() == getDestination().size())) {
+                try {
+                    resultQueue.put(nodeResults);
+                } catch (InterruptedException e) {
+                    logger.error("Error adding result to result queue", e);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Returns the responses.
+    /**
+     * Returns the responses.
      * If no results found it returns an empty map.
-	 * @return
-	 * @throws Exception
-	 */
-	public Map<Node,R> getResult() throws Exception {
-		if (this.resultQueue != null) {
-			Map<Node, R> nodeResults = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
-		}
+     *
+     * @return
+     * @throws Exception
+     */
+    public Map<Node, R> getResult() throws Exception {
+        if (this.resultQueue != null) {
+            Map<Node, R> nodeResults = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
+        }
         return nodeResults;
-	}
+    }
 
 
+    public long getTimeout() {
+        return timeout;
+    }
 
-	public long getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
 }
