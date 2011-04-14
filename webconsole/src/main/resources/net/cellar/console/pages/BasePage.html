@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/reset.css" type="text/css" media="all">
+    <link rel="stylesheet" href="css/grid.css" type="text/css" media="all">
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" href="css/jquery-ui-1.8.5.custom.css" type="text/css" media="all">
+    <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cycle.all.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="js/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<header>
+    <nav>
+        <div class="container">
+            <div class="wrapper">
+                <h1><a href="/home"><strong>Cellar</strong><br/>management console</a></h1>
+                <ul>
+                    <li><a href="/home" wicket:id="homePageLink">Home</a></li>
+                    <li><a href="/nodes" wicket:id="nodesPageLink">Nodes</a></li>
+                    <li><a href="/handlers" wicket:id="handlersPageLink">Handlers</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<section id="content">
+    <wicket:child/>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="wrapper">
+            <div class="copy">Cellar (c) 2011 | <a href="https://github.com/iocanel/cellar">GitHub Repository</a></div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

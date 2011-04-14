@@ -7,13 +7,14 @@
     </feature>
 
     <feature name='hazelcast-monitor' description='Hazelcast console' version='${hazelcast.version}' resolver='(obr)'>
-        <feature version="${hazelcast.version}">hazelcast</feature>
-         <bundle>webbundle:mvn:com.hazelcast/hazelcast-monitor/${hazelcast.version}/war</bundle>
+        <feature version='${hazelcast.version}'>hazelcast</feature>
+        <feature version='${karaf.version}'>war</feature>
+        <bundle>webbundle:mvn:com.hazelcast/hazelcast-monitor/${hazelcast.version}/war</bundle>
     </feature>
 
     <feature name='cellar' description='Karaf clustering' version='${project.version}' resolver='(obr)'>
-        <feature version="${hazelcast.version}">hazelcast</feature>
-        <feature version="${springdm.version}">spring-dm</feature>
+        <feature version='${hazelcast.version}'>hazelcast</feature>
+        <feature version='${springdm.version}'>spring-dm</feature>
         <bundle>mvn:net.cellar/core/${project.version}</bundle>
         <bundle>mvn:net.cellar/config/${project.version}</bundle>
         <bundle>mvn:net.cellar/features/${project.version}</bundle>
@@ -21,13 +22,35 @@
         <bundle>mvn:net.cellar/shell/${project.version}</bundle>
         <bundle>mvn:net.cellar/hazelcast/${project.version}</bundle>
         <config name="net.cellar.configuration">
-           net.cellar.configuration=FULL
-           net.cellar.features=FULL
+            net.cellar.configuration=FULL
+            net.cellar.features=FULL
         </config>
-        <config name="net.cellar.features">
-           hazelcast=FULL
-           cellar=FULL
-           ssh=FULL
+        <config name='net.cellar.features'>
+            hazelcast=FULL
+            cellar=FULL
+            ssh=FULL
         </config>
     </feature>
+
+
+    <feature name='wicket' description='Wicket Web Framework' version='${wicket.version}' resolver='(obr)'>
+        <feature version='${karaf.version}'>war</feature>
+        <bundle dependency='true'>mvn:org.apache.wicket/wicket/${wicket.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.wicket/wicket-extensions/${wicket.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.wicket/wicket-ioc/${wicket.version}</bundle>
+    </feature>
+
+    <feature name='cellar-console' description='Cellar Web console' version='${project.version}' resolver='(obr)'>
+        <feature version='${karaf.version}'>war</feature>
+        <feature version='${project.version}'>cellar</feature>
+        <bundle dependency='true'>
+            mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.scala-compiler/${scala.bundle.version}
+        </bundle>
+        <bundle dependency='true'>
+            mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.scala-library/${scala.bundle.version}
+        </bundle>
+        <bundle>mvn:net.cellar/webconsole/${project.version}/war</bundle>
+    </feature>
+
+
 </features>

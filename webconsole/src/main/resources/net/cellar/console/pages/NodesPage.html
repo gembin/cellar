@@ -1,0 +1,46 @@
+<html>
+<head></head>
+<body>
+<wicket:extend>
+    <div class="top">
+        <div class="box">
+            <div class="container">
+                <div class="clearfix">
+                    <section id="intro">
+                        <div class="inner">
+                            <h2>Cellar<span>cluster nodes</span></h2>
+
+                            <p>View and manage the nodes of the cellar cluster.</p>
+                        </div>
+                    </section>
+                    <form wicket:id="form">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th align="left">Host</th>
+                                <th align="left">Port</th>
+                                <th align="right">Identifier</th>
+                                <th align="right"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr wicket:id="nodeList">
+                                <td align="left"><span wicket:id="host">Host</span></td>
+                                <td align="left"><span wicket:id="port">Port</span></td>
+                                <td align="right"><span wicket:id="id">Id</span></td>
+                                <td align="right">
+                                    <button class="inspect-button" wicket:id="manage"></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</wicket:extend>
+</body>
+</html>

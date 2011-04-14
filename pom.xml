@@ -32,10 +32,6 @@
                         <supportedProjectType>jar</supportedProjectType>
                         <supportedProjectType>war</supportedProjectType>
                         <supportedProjectType>bundle</supportedProjectType>
-                        <supportedProjectType>jbi-component</supportedProjectType>
-                        <supportedProjectType>jbi-shared-library</supportedProjectType>
-                        <supportedProjectType>jbi-service-unit</supportedProjectType>
-                        <supportedProjectType>jbi-service-assembly</supportedProjectType>
                     </supportedProjectTypes>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
@@ -106,6 +102,22 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>${maven-scala-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -116,22 +128,30 @@
         <module>shell</module>
         <module>hazelcast</module>
         <module>utils</module>
+        <module>webconsole</module>
     </modules>
 
     <properties>
+        <scala.version>2.8.0</scala.version>
+        <scala.bundle.version>2.8.1_1</scala.bundle.version>
         <osgi.version>4.2.0</osgi.version>
         <karaf.version>2.2.0</karaf.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
         <springdm.version>1.2.1</springdm.version>
         <hazelcast.version>1.9.3-SNAPSHOT</hazelcast.version>
-        <maven-bundle-plugin.version>2.1.0</maven-bundle-plugin.version>
-        <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>2.4.3</maven-resources-plugin.version>
-        <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
-        <slf4j.version>1.5.8</slf4j.version>
 
+        <wicket.version>1.4.15</wicket.version>
+
+        <slf4j.version>1.5.8</slf4j.version>
         <junit.version>4.8.2</junit.version>
         <easymock.version>3.0</easymock.version>
+        <!-- Plugin Versions -->
+        <maven-bundle-plugin.version>2.1.0</maven-bundle-plugin.version>
+        <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
+        <maven-war-plugin.version>2.1.1</maven-war-plugin.version>
+        <maven-resources-plugin.version>2.4.3</maven-resources-plugin.version>
+        <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
+        <maven-scala-plugin.version>2.15.0</maven-scala-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -162,6 +182,32 @@
                 <version>${karaf.version}</version>
             </dependency>
 
+            <!-- Scala -->
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-compiler</artifactId>
+                <version>${scala.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Scala -->
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.scala-library</artifactId>
+                <version>${scala.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.scala-compiler</artifactId>
+                <version>${scala.bundle.version}</version>
+                <scope>test</scope>
+            </dependency>
+
             <!-- Logging Dependencies -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -189,6 +235,25 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>repository.scala-tools.org</id>
+            <url>http://scala-tools.org/repo-releases/</url>
+        </repository>
+        <repository>
+            <id>JBoss Nexus Repository</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>scala-tools.org</id>
+            <name>Scala-tools Maven2 Repository</name>
+            <url>http://scala-tools.org/repo-releases</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 
 </project>
