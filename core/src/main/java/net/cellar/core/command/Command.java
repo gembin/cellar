@@ -24,10 +24,11 @@ public class Command<R extends Result> extends Event {
 
     public Command(String id) {
         super(id);
+        this.force = true;
     }
 
     @Override
-    public Boolean getBypassSwitches() {
+    public Boolean getForce() {
         return true;
     }
 
@@ -51,7 +52,7 @@ public class Command<R extends Result> extends Event {
     public void addResults(R... results) {
         if (results != null && results.length > 0) {
             for (R result : results) {
-                nodeResults.put(result.getSource(), result);
+                nodeResults.put(result.getSourceNode(), result);
             }
 
             if (getDestination() == null || (nodeResults.size() == getDestination().size())) {

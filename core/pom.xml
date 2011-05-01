@@ -16,6 +16,7 @@
     <properties>
         <osgi.import>
             !net.cellar.core*;version=${project.version},
+            org.apache.karaf.shell.console*;version="[2,4)",
             *
         </osgi.import>
         <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*</osgi.dynamic.import>
@@ -29,6 +30,17 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+        </dependency>
+
+        <!-- Configuration Admin -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
 
         <!-- Logging Dependencies -->

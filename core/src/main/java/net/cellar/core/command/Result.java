@@ -9,10 +9,11 @@ public class Result extends Event {
 
     public Result(String id) {
         super(id);
+        this.force = true;
     }
 
     @Override
-    public Boolean getBypassSwitches() {
+    public Boolean getForce() {
         return true;
     }
 }
