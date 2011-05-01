@@ -1,15 +1,21 @@
 package net.cellar.hazelcast;
 
 
-
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ITopic;
 import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import net.cellar.core.ClusterManager;
+import net.cellar.core.Group;
 import net.cellar.core.Node;
+import net.cellar.core.event.EventConsumer;
+import net.cellar.core.event.EventProducer;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,147 +25,203 @@ import java.util.Set;
  */
 public class HazelcastClusterManager implements ClusterManager {
 
-	private static final String GENERATOR_ID = "net.cellar.idgen";
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(HazelcastClusterManager.class);
 
-	private HazelcastInstance instance;
-	private IdGenerator idgenerator;
+    private static final String GENERATOR_ID = "net.cellar.idgen";
 
-	/**
-	 * Returns a named distributed map.
-	 * @param mapName
-	 * @return
-	 */
-	public Map getMap(String mapName) {
-		return instance.getMap(mapName);
-	}
+    private HazelcastInstance instance;
+    private IdGenerator idgenerator;
 
-	/**
-	 * Returns a named distributed list.
-	 * @param listName
-	 * @return
-	 */
-	public List getList(String listName) {
-		return instance.getList(listName);
-	}
+    private List<EventProducer> producerList;
+    private List<EventConsumer> consumerList;
 
-	/**
-	 * Returns the list of Hazelcast Nodes.
-	 * @return
-	 */
-	public List<Node> getNodes() {
-		List<Node> nodes = new ArrayList<Node>();
 
-		Cluster cluster = instance.getCluster();
-		if(cluster != null) {
-			Set<Member> members = cluster.getMembers();
-			if(members!=null && !members.isEmpty()) {
-				for(Member member:members) {
-					HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(),member.getInetSocketAddress().getPort());
-					nodes.add(node);
-				}
-			}
-		}
-		return nodes;
-	}
+    private ConfigurationAdmin configurationAdmin;
 
-	/**
-	 * Returns the node on which the command was run.
-	 * @return
-	 */
-	public Node getNode() {
-		Cluster cluster = instance.getCluster();
-		if(cluster != null) {
-		   Member member = cluster.getLocalMember();
-		   HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(),member.getInetSocketAddress().getPort());
-		   return node;
-		}
-		else return null;
-	}
 
-	/**
-	 * Returns the {@code Node}s with the corresponding ids.
-	 * @param ids
-	 * @return
-	 */
-	public List<Node> getNode(List<String> ids) {
-		List<Node> nodes = new ArrayList<Node>();
-		if (ids != null && !ids.isEmpty()) {
-			Cluster cluster = instance.getCluster();
-			if (cluster != null) {
-				Set<Member> members = cluster.getMembers();
-				if (members != null && !members.isEmpty()) {
-					for (Member member : members) {
-						HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
-						if (ids.contains(node.getId())) {
-							nodes.add(node);
-						}
-					}
-				}
-			}
-		}
-		return nodes;
-	}
+    /**
+     * Returns a named distributed map.
+     *
+     * @param mapName
+     * @return
+     */
+    public Map getMap(String mapName) {
+        return instance.getMap(mapName);
+    }
 
-	/**
-	 * Returns the {@code Node} with the corresponding id.
-	 *
-	 * @param id
-	 * @return
-	 */
-	public Node getNode(String id) {
-		if (id != null) {
-			Cluster cluster = instance.getCluster();
-			if (cluster != null) {
-				Set<Member> members = cluster.getMembers();
-				if (members != null && !members.isEmpty()) {
-					for (Member member : members) {
-						HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
-						if (id.equals(node.getId())) {
-							return node;
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+    /**
+     * Returns a named distributed list.
+     *
+     * @param listName
+     * @return
+     */
+    public List getList(String listName) {
+        return instance.getList(listName);
+    }
 
-	/**
-	 * Generate an id.
-	 * @return
-	 */
-	public synchronized String generateId() {
-		if(idgenerator == null) {
-           idgenerator = instance.getIdGenerator(GENERATOR_ID);
-		}
-		return String.valueOf(idgenerator.newId());
-	}
+    @Override
+    public EventProducer getEventProducer(String groupName) {
+        ITopic topic = instance.getTopic(Constants.TOPIC + "." + groupName);
+        TopicProducer producer = new TopicProducer();
+        producer.setTopic(topic);
+        producer.setNode(getNode());
+        return producer;
+    }
 
-	public void start() {
 
-	}
+    /**
+     * Returns the list of Hazelcast Nodes.
+     *
+     * @return
+     */
+    public Set<Node> listNodes() {
+        Set<Node> nodes = new HashSet<Node>();
 
-	public void stop() {
-		instance.shutdown();
-	}
+        Cluster cluster = instance.getCluster();
+        if (cluster != null) {
+            Set<Member> members = cluster.getMembers();
+            if (members != null && !members.isEmpty()) {
+                for (Member member : members) {
+                    HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
+                    nodes.add(node);
+                }
+            }
+        }
+        return nodes;
+    }
 
-	public void restart() {
-		instance.restart();
-	}
+    /**
+     * Returns the node on which the command was run.
+     *
+     * @return
+     */
+    public Node getNode() {
+        Cluster cluster = instance.getCluster();
+        if (cluster != null) {
+            Member member = cluster.getLocalMember();
+            HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
+            return node;
+        } else return null;
+    }
 
-	/**
-	 * Returns the Hazelcast instance.
-	 * @return
-	 */
-	public HazelcastInstance getInstance() {
-		return instance;
-	}
+    /**
+     * Returns the {@code Node}s with the corresponding ids.
+     *
+     * @param ids
+     * @return
+     */
+    public Set<Node> listNodes(Collection<String> ids) {
+        Set<Node> nodes = new HashSet<Node>();
+        if (ids != null && !ids.isEmpty()) {
+            Cluster cluster = instance.getCluster();
+            if (cluster != null) {
+                Set<Member> members = cluster.getMembers();
+                if (members != null && !members.isEmpty()) {
+                    for (Member member : members) {
+                        HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
+                        if (ids.contains(node.getId())) {
+                            nodes.add(node);
+                        }
+                    }
+                }
+            }
+        }
+        return nodes;
+    }
 
-	/**
-	 * Sets the Hazelcast instance.
-	 * @param instance
-	 */
-	public void setInstance(HazelcastInstance instance) {
-		this.instance = instance;
-	}
+    /**
+     * Returns the {@code Node} with the corresponding id.
+     *
+     * @param id
+     * @return
+     */
+    public Node findNodeById(String id) {
+        if (id != null) {
+            Cluster cluster = instance.getCluster();
+            if (cluster != null) {
+                Set<Member> members = cluster.getMembers();
+                if (members != null && !members.isEmpty()) {
+                    for (Member member : members) {
+                        HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
+                        if (id.equals(node.getId())) {
+                            return node;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Set<Node> listNodesByGroup(Group group) {
+        return group.getMembers();
+    }
+
+    /**
+     * Generate an id.
+     *
+     * @return
+     */
+    public synchronized String generateId() {
+        if (idgenerator == null) {
+            idgenerator = instance.getIdGenerator(GENERATOR_ID);
+        }
+        return String.valueOf(idgenerator.newId());
+    }
+
+    public void start() {
+
+    }
+
+    public void stop() {
+        instance.shutdown();
+    }
+
+    public void restart() {
+        instance.restart();
+    }
+
+
+    /**
+     * Returns the Hazelcast instance.
+     *
+     * @return
+     */
+    public HazelcastInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * Sets the Hazelcast instance.
+     *
+     * @param instance
+     */
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
+    }
+
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    public List<EventProducer> getProducerList() {
+        return producerList;
+    }
+
+    public void setProducerList(List<EventProducer> producerList) {
+        this.producerList = producerList;
+    }
+
+    public List<EventConsumer> getConsumerList() {
+        return consumerList;
+    }
+
+    public void setConsumerList(List<EventConsumer> consumerList) {
+        this.consumerList = consumerList;
+    }
 }

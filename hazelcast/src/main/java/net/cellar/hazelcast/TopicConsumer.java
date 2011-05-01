@@ -1,5 +1,6 @@
 package net.cellar.hazelcast;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.MessageListener;
 import net.cellar.core.Dispatcher;
@@ -23,6 +24,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
+    private HazelcastInstance instance;
     private ITopic topic;
     private Dispatcher dispatcher;
     private Node node;
@@ -32,6 +34,9 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
      */
     public void init() {
         if (topic != null) {
+            topic.addMessageListener(this);
+        } else {
+            topic = instance.getTopic(Constants.TOPIC);
             topic.addMessageListener(this);
         }
     }
@@ -54,7 +59,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         //Check if event has a specified destination.
         if (event.getDestination() == null || event.getDestination().contains(node)) {
             //Check is switch is on.
-            if (eventSwitch.getStatus().equals(SwitchStatus.ON) || event.getBypassSwitches()) {
+            if (eventSwitch.getStatus().equals(SwitchStatus.ON) || event.getForce()) {
                 dispatcher.dispatch(event);
             }
         }
@@ -64,20 +69,28 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         consume(message);
     }
 
-    public ITopic<Event> getTopic() {
-        return topic;
-    }
-
-    public void setTopic(ITopic<Event> topic) {
-        this.topic = topic;
-    }
-
     public Dispatcher getDispatcher() {
         return dispatcher;
     }
 
     public void setDispatcher(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
+    }
+
+    public HazelcastInstance getInstance() {
+        return instance;
+    }
+
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
+    }
+
+    public ITopic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(ITopic topic) {
+        this.topic = topic;
     }
 
     public Switch getSwitch() {

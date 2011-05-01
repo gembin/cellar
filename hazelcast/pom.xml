@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hazelcast</artifactId>
-     <packaging>bundle</packaging>
+    <packaging>bundle</packaging>
     <name>Cellar :: Hazelcast</name>
 
     <properties>
@@ -42,6 +42,13 @@
             <groupId>net.cellar</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- Spring DM -->
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>org.springframework.osgi.core</artifactId>
+            <version>1.2.1</version>
         </dependency>
 
         <!-- Logging Dependencies -->

@@ -8,13 +8,27 @@
 
 
     <!-- Hazelcast hazelcast -->
-    <bean id="hazelcast" class="com.hazelcast.core.Hazelcast" factory-method="newHazelcastInstance" destroy-method="shutdown">
+    <bean id="hazelcast" class="com.hazelcast.core.Hazelcast" factory-method="newHazelcastInstance"
+          destroy-method="shutdown">
         <constructor-arg ref="config"/>
+    </bean>
+
+    <bean id="membershipListener" class="net.cellar.hazelcast.CellarMembershipListener">
+        <constructor-arg index="0" ref="hazelcast"/>
+        <property name="synchronizers" ref="synchronizers"/>
     </bean>
 
     <!-- Cluster Manager -->
     <bean id="clusterManager" class="net.cellar.hazelcast.HazelcastClusterManager">
         <property name="instance" ref="hazelcast"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+
+    <!-- Cluster Manager -->
+    <bean id="groupManager" class="net.cellar.hazelcast.HazelcastGroupManager" init-method="init">
+        <property name="instance" ref="hazelcast"/>
+        <property name="dispatcher" ref="dispatcher"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <!-- Hazelcast Cluster and Node -->
@@ -50,7 +64,7 @@
     </bean>
 
     <bean id="producerSwitchResultHandler" class="net.cellar.core.control.ProducerSwitchResultHandler">
-       <property name="commandStore" ref="commandStore"/>
+        <property name="commandStore" ref="commandStore"/>
     </bean>
 
     <!-- Consumer Switch Event Handler -->
@@ -69,6 +83,17 @@
     </bean>
 
     <bean id="manageHandlersResultHandler" class="net.cellar.core.control.ManageHandlersResultHandler">
+        <property name="commandStore" ref="commandStore"/>
+    </bean>
+
+    <!-- Managed Group Command Handlers -->
+    <bean id="manageGroupCommandHandler" class="net.cellar.core.control.ManageGroupCommandHandler">
+        <property name="producer" ref="producer"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
+
+    <bean id="manageGroupResultHandler" class="net.cellar.core.control.ManageGroupResultHandler">
         <property name="commandStore" ref="commandStore"/>
     </bean>
 
@@ -96,7 +121,9 @@
     <!-- Hazelcast Instance Service-->
     <osgi:service ref="hazelcast" interface="com.hazelcast.core.HazelcastInstance"/>
     <osgi:service ref="producer" interface="net.cellar.core.event.EventProducer"/>
+
     <osgi:service ref="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <osgi:service ref="groupManager" interface="net.cellar.core.GroupManager"/>
     <osgi:service ref="executionContext" interface="net.cellar.core.command.ExecutionContext"/>
     <osgi:service ref="commandStore" interface="net.cellar.core.command.CommandStore"/>
 
@@ -107,5 +134,19 @@
     <osgi:service ref="producerSwitchResultHandler" interface="net.cellar.core.event.EventHandler"/>
     <osgi:service ref="manageHandlersCommandHandler" interface="net.cellar.core.event.EventHandler"/>
     <osgi:service ref="manageHandlersResultHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="manageGroupCommandHandler" interface="net.cellar.core.event.EventHandler"/>
+    <osgi:service ref="manageGroupResultHandler" interface="net.cellar.core.event.EventHandler"/>
+
+
+    <osgi:reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+
+    <!-- Group Consumer & Producer Serices -->
+    <osgi:list id="groupEventProducers" cardinality="0..N" interface="net.cellar.core.event.EventProducer"
+               filter="(type = group)"/>
+    <osgi:list id="groupEventConsumers" cardinality="0..N" interface="net.cellar.core.event.EventConsumer"
+               filter="(type = group)"/>
+
+    <osgi:list id="synchronizers" cardinality="0..N" interface="net.cellar.core.Synchronizer"/>
+
 
 </beans>
