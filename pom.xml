@@ -64,6 +64,16 @@
                                     <type>xml</type>
                                     <classifier>features</classifier>
                                 </artifact>
+                                <artifact>
+                                    <file>target/groups.cfg</file>
+                                    <type>cfg</type>
+                                    <classifier>groups</classifier>
+                                </artifact>
+                                <artifact>
+                                    <file>target/node.cfg</file>
+                                    <type>cfg</type>
+                                    <classifier>node</classifier>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>
@@ -138,7 +148,7 @@
         <karaf.version>2.2.0</karaf.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
         <springdm.version>1.2.1</springdm.version>
-        <hazelcast.version>1.9.3-SNAPSHOT</hazelcast.version>
+        <hazelcast.version>1.9.3-RC</hazelcast.version>
 
         <wicket.version>1.4.15</wicket.version>
 
@@ -179,6 +189,18 @@
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
                 <artifactId>org.apache.karaf.features.core</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.shell</groupId>
+                <artifactId>org.apache.karaf.shell.console</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
+                <artifactId>org.apache.karaf.features.command</artifactId>
                 <version>${karaf.version}</version>
             </dependency>
 
@@ -254,6 +276,4 @@
             <url>http://scala-tools.org/repo-releases</url>
         </pluginRepository>
     </pluginRepositories>
-
-
 </project>

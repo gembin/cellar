@@ -9,7 +9,7 @@
     <feature name='hazelcast-monitor' description='Hazelcast console' version='${hazelcast.version}' resolver='(obr)'>
         <feature version='${hazelcast.version}'>hazelcast</feature>
         <feature version='${karaf.version}'>war</feature>
-        <bundle>webbundle:mvn:com.hazelcast/hazelcast-monitor/${hazelcast.version}/war</bundle>
+        <bundle>mvn:com.hazelcast/hazelcast-monitor/${hazelcast.version}/war</bundle>
     </feature>
 
     <feature name='cellar' description='Karaf clustering' version='${project.version}' resolver='(obr)'>
@@ -21,17 +21,10 @@
         <bundle>mvn:net.cellar/utils/${project.version}</bundle>
         <bundle>mvn:net.cellar/shell/${project.version}</bundle>
         <bundle>mvn:net.cellar/hazelcast/${project.version}</bundle>
-        <config name="net.cellar.configuration">
-            net.cellar.configuration=FULL
-            net.cellar.features=FULL
-        </config>
-        <config name='net.cellar.features'>
-            hazelcast=FULL
-            cellar=FULL
-            ssh=FULL
-        </config>
+        <configfile finalname="/etc/net.cellar.groups.cfg">mvn:net.cellar/cellar/${project.version}/cfg/groups
+        </configfile>
+        <configfile finalname="/etc/net.cellar.node.cfg">mvn:net.cellar/cellar/${project.version}/cfg/node</configfile>
     </feature>
-
 
     <feature name='wicket' description='Wicket Web Framework' version='${wicket.version}' resolver='(obr)'>
         <feature version='${karaf.version}'>war</feature>
