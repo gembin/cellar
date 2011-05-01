@@ -27,17 +27,23 @@ public class GroupDeleteCommand extends GroupSupport {
      */
     @Override
     protected Object doExecute() throws Exception {
-        Group g = groupManager.findGroupByName(group);
-        List<String> nodes = new LinkedList<String>();
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            Group g = groupManager.findGroupByName(group);
+            List<String> nodes = new LinkedList<String>();
 
-        if (g.getMembers() != null && !g.getMembers().isEmpty()) {
-            for (Node n : g.getMembers()) {
-                nodes.add(n.getId());
+            if (g.getMembers() != null && !g.getMembers().isEmpty()) {
+                for (Node n : g.getMembers()) {
+                    nodes.add(n.getId());
+                }
+                doExecute(ManageGroupAction.QUIT, group, nodes);
             }
-            doExecute(ManageGroupAction.QUIT, group, nodes);
-        }
 
-        groupManager.deleteGroup(group);
+            groupManager.deleteGroup(group);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
         return null;
     }
 }

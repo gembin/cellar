@@ -58,7 +58,7 @@ public abstract class GroupSupport extends ClusterCommandSuppot {
                             for (Node memeber : g.getMembers()) {
                                 String name = g.getName();
                                 String mark = " ";
-                                if (node.equals(clusterManager.getNode()))
+                                if (memeber.equals(clusterManager.getNode()))
                                     mark = "*";
                                 System.out.println(String.format(OUTPUT_FORMAT, mark, memeber.getId(), name));
                             }

@@ -33,7 +33,7 @@ public class ListCommand extends ConfigCommandSupport {
                 for (String pid : configurationTable.keySet()) {
                     System.out.println(String.format(OUTPUT_FORMAT, pid));
                 }
-            } else System.err.print("No PIDs found for group:" + groupName);
+            } else System.err.println("No PIDs found for group:" + groupName);
         } finally {
             Thread.currentThread().setContextClassLoader(originalClassLoader);
 

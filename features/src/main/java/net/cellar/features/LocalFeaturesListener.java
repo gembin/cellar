@@ -54,6 +54,8 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         //This is required because upon reception of the even the feature service considers the feature uninstalled.
                         if (FeatureEvent.EventType.FeatureInstalled.equals(event.getType())) {
                             pushFeature(event.getFeature(), group, true);
+                        } else {
+                            pushFeature(event.getFeature(), group, false);
                         }
 
                         RemoteFeaturesEvent featureEvent = new RemoteFeaturesEvent(name, version, type);
