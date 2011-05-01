@@ -3,9 +3,10 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <!-- Cluster Configuration Listener -->
-    <bean id="featuresListener" class="net.cellar.features.LocalFeaturesListener"  init-method="init" destroy-method="destroy">
+    <bean id="featuresListener" class="net.cellar.features.LocalFeaturesListener" init-method="init"
+          destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
-        <property name="producer" ref="eventProducer"/>
+        <property name="producerList" ref="groupEventProducers"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
@@ -15,7 +16,8 @@
           init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="producer" ref="eventProducer"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="producerList" ref="groupEventProducers"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
@@ -32,19 +34,25 @@
           init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <!-- OSGi Services  & References -->
     <service ref="featuresListener" interface="org.apache.karaf.features.FeaturesListener"/>
+    <service ref="synchronizer" interface="net.cellar.core.Synchronizer"/>
     <service ref="featuresHandler" interface="net.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
-         </service-properties>
+        </service-properties>
     </service>
+
     <service ref="repositoryHandler" interface="net.cellar.core.event.EventHandler"/>
     <reference id="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="net.cellar.core.GroupManager"/>
     <reference id="eventProducer" interface="net.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference-list id="groupEventProducers" member-type="service-object"
+                    interface="net.cellar.core.event.EventProducer" filter="(type=group)"/>
 
 </blueprint>

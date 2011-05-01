@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
+
+    <!-- Command Bundle -->
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+        <command name="cluster/features-install">
+            <action class="net.cellar.features.shell.InstallFeatureCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="featuresService" ref="featuresService"/>
+            </action>
+            <completers>
+                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allFeatureCompleter"/>
+            </completers>
+        </command>
+        <command name="cluster/features-uninstall">
+            <action class="net.cellar.features.shell.UninstallFeatureCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="featuresService" ref="featuresService"/>
+            </action>
+            <completers>
+                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allFeatureCompleter"/>
+            </completers>
+        </command>
+        <command name="cluster/features-list">
+            <action class="net.cellar.features.shell.ListGroupFeatures">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="featuresService" ref="featuresService"/>
+            </action>
+            <completers>
+                <ref component-id="allGroupCompleter"/>
+            </completers>
+        </command>
+    </command-bundle>
+
+    <bean id="allGroupCompleter" class="net.cellar.core.shell.completers.AllGroupsCompleter">
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
+
+    <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
+        <property name="featuresService" ref="featuresService"/>
+    </bean>
+
+</blueprint>

@@ -18,7 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.import>
             !net.cellar.features*,
-            net.cellar.features*;version=${project.version},
+            net.cellar.core*;version=${project.version},
+            net.cellar.common*;version=${project.version},
             org.apache.karaf.features;version="[2,3)",
             *
         </osgi.import>
@@ -48,6 +49,12 @@
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.command</artifactId>
+        </dependency>
+
+
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -58,7 +65,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
-
 
         <!-- Testing -->
         <dependency>
