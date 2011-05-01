@@ -8,6 +8,7 @@
         <property name="featuresService" ref="featuresService"/>
         <property name="producerList" ref="groupEventProducers"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
