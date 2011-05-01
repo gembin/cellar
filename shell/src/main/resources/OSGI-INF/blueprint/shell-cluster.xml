@@ -4,57 +4,192 @@
 
     <!-- Command Bundle -->
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cluster/list">
+        <command name="cluster/list-nodes">
             <action class="net.cellar.shell.ListNodesCommand">
-              <property name="clusterManager" ref="clusterManager"/>
+                <property name="clusterManager" ref="clusterManager"/>
             </action>
         </command>
 
         <command name="cluster/ping">
             <action class="net.cellar.shell.PingCommand">
-              <property name="clusterManager" ref="clusterManager"/>
-              <property name="executionContext" ref="executionContext"/>
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
         </command>
 
-        <command name="cluster/consume">
-            <action class="net.cellar.shell.ConsumeCommand">
-              <property name="clusterManager" ref="clusterManager"/>
-              <property name="executionContext" ref="executionContext"/>
+        <command name="cluster/consumer-start">
+            <action class="net.cellar.shell.consumer.ConsumerStartCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
-             <completers>
-                <ref component-id="allNodesCompleter" />
+            <completers>
+                <ref component-id="allNodesCompleter"/>
             </completers>
         </command>
 
-        <command name="cluster/produce">
-            <action class="net.cellar.shell.ProduceCommand">
-              <property name="clusterManager" ref="clusterManager"/>
-              <property name="executionContext" ref="executionContext"/>
+        <command name="cluster/consumer-stop">
+            <action class="net.cellar.shell.consumer.ConsumerStopCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
-             <completers>
-                <ref component-id="allNodesCompleter" />
+            <completers>
+                <ref component-id="allNodesCompleter"/>
             </completers>
         </command>
 
-        <command name="cluster/handler">
-            <action class="net.cellar.shell.HandlersCommand">
-              <property name="clusterManager" ref="clusterManager"/>
-              <property name="executionContext" ref="executionContext"/>
+        <command name="cluster/consumer-status">
+            <action class="net.cellar.shell.consumer.ConsumerStatusCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
-             <completers>
-                <ref component-id="allNodesCompleter" />
+            <completers>
+                <ref component-id="allNodesCompleter"/>
             </completers>
         </command>
+
+        <command name="cluster/producer-start">
+            <action class="net.cellar.shell.producer.ProducerStartCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/producer-stop">
+            <action class="net.cellar.shell.producer.ProducerStopCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/producer-status">
+            <action class="net.cellar.shell.producer.ProducerStatusCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/handler-start">
+            <action class="net.cellar.shell.handler.HandlersStartCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/handler-stop">
+            <action class="net.cellar.shell.handler.HandlersStopCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+
+        <command name="cluster/handler-status">
+            <action class="net.cellar.shell.handler.HandlersStatusCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allNodesCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/group-join">
+            <action class="net.cellar.shell.group.GroupJoinCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="otherGroupCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/group-quit">
+            <action class="net.cellar.shell.group.GroupQuitCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="localGroupCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/group-set">
+            <action class="net.cellar.shell.group.GroupSetCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allGroupCompleter"/>
+            </completers>
+        </command>
+
+        <command name="cluster/group-list">
+            <action class="net.cellar.shell.group.GroupListCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+        </command>
+
+        <command name="cluster/group-create">
+            <action class="net.cellar.shell.group.GroupCreateCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+        </command>
+
+        <command name="cluster/group-delete">
+            <action class="net.cellar.shell.group.GroupDeleteCommand">
+                <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
+            </action>
+            <completers>
+                <ref component-id="allGroupCompleter"/>
+            </completers>
+        </command>
+
     </command-bundle>
 
     <!-- Reference to the Cluster Manager -->
     <reference id="clusterManager" interface="net.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="net.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="net.cellar.core.command.ExecutionContext"/>
 
     <!-- Completers -->
-    <bean id="allNodesCompleter" class="net.cellar.shell.completers.AllNodeCompleter">
+    <bean id="allNodesCompleter" class="net.cellar.core.completers.AllNodeCompleter">
         <property name="clusterManager" ref="clusterManager"/>
+    </bean>
+
+    <bean id="allGroupCompleter" class="net.cellar.core.shell.completers.AllGroupsCompleter">
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
+
+    <bean id="localGroupCompleter" class="net.cellar.core.shell.completers.LocalGroupsCompleter">
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
+
+    <bean id="otherGroupCompleter" class="net.cellar.core.shell.completers.OtherGroupsCompleter">
+        <property name="groupManager" ref="groupManager"/>
     </bean>
 
 </blueprint>
