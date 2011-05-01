@@ -102,12 +102,14 @@ public class ConfigurationSupport extends CellarSupport {
 
     public Dictionary filterDictionary(Dictionary dictionary) {
         Dictionary result = new Properties();
-        Enumeration enumaration = dictionary.keys();
-        while (enumaration.hasMoreElements()) {
-            String key = (String) enumaration.nextElement();
-            if (!isPropertyFiltered(key)) {
-                String value = (String) dictionary.get(key);
-                result.put(key, value);
+        if (dictionary != null) {
+            Enumeration enumaration = dictionary.keys();
+            while (enumaration.hasMoreElements()) {
+                String key = (String) enumaration.nextElement();
+                if (!isPropertyFiltered(key)) {
+                    String value = (String) dictionary.get(key);
+                    result.put(key, value);
+                }
             }
         }
         return result;
