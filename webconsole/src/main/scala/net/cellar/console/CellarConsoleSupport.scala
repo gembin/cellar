@@ -8,7 +8,7 @@ import net.cellar.core.command.ExecutionContext
  * @author: iocanel
  */
 
-trait CellarSupport {
+trait CellarConsoleSupport {
   /**
    * Looks up and returns the bundle context.
    */

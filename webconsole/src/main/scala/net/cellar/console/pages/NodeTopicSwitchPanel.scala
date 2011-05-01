@@ -8,9 +8,9 @@ import org.apache.wicket.markup.html.basic.Label
 import org.apache.wicket.ajax.AjaxRequestTarget
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton
 import org.apache.wicket.model.{LoadableDetachableModel, CompoundPropertyModel, Model, IModel}
-import java.util.{List, LinkedList, Arrays}
+import java.util.{Set, List, LinkedList, Arrays}
 import net.cellar.core.Node
-import net.cellar.console.CellarSupport
+import net.cellar.console.CellarConsoleSupport
 import net.cellar.console.domain.TopicSwitchData
 import net.cellar.core.control._
 
@@ -18,7 +18,7 @@ import net.cellar.core.control._
  * @author: iocanel
  */
 
-class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) extends Panel(wicketId, model) with CellarSupport {
+class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) extends Panel(wicketId, model) with CellarConsoleSupport {
 
   def this(wicketId: String) = this (wicketId, new Model[String]())
 
@@ -61,7 +61,7 @@ class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) exte
 
   def switchProducer(nodeId: String, status: Boolean) {
     var switchCommand = new ProducerSwitchCommand(getClusterManager.generateId)
-    switchCommand.setDestination(getClusterManager.getNode(Arrays.asList(nodeId)))
+    switchCommand.setDestination(getClusterManager.listNodes(Arrays.asList(nodeId)))
     val switchStatus = if (status) SwitchStatus.ON else SwitchStatus.OFF
     switchCommand.setStatus(switchStatus)
     executeProducerCommand(switchCommand, nodeId)
@@ -69,7 +69,7 @@ class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) exte
 
   def switchConsumer(nodeId: String, status: Boolean) {
     var switchCommand = new ConsumerSwitchCommand(getClusterManager.generateId)
-    switchCommand.setDestination(getClusterManager.getNode(Arrays.asList(nodeId)))
+    switchCommand.setDestination(getClusterManager.listNodes(Arrays.asList(nodeId)))
     val switchStatus = if (status) SwitchStatus.ON else SwitchStatus.OFF
     switchCommand.setStatus(switchStatus)
     executeConsumerCommand(switchCommand, nodeId)
@@ -101,10 +101,10 @@ class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) exte
    */
   def executeConsumerCommand(consumerCommand: ConsumerSwitchCommand, nodeIds: String): TopicSwitchData = {
     var topicSwitchData: TopicSwitchData = null
-    var targetNodes: List[Node] = getClusterManager.getNode(Arrays.asList(nodeIds))
+    var targetNodes: Set[Node] = getClusterManager.listNodes(Arrays.asList(nodeIds))
 
     if (targetNodes != null && !targetNodes.isEmpty) {
-      var node = targetNodes.get(0)
+      var node = targetNodes.toArray(new Array[Node](0))(0)
       consumerCommand.setDestination(targetNodes)
       var map = getExecutionContext.execute[ConsumerSwitchResult, ConsumerSwitchCommand](consumerCommand)
       if (map != null || !map.isEmpty) {
@@ -124,10 +124,10 @@ class NodeTopicSwitchPanel(var wicketId: String, var model: IModel[String]) exte
    */
   def executeProducerCommand(producerCommand: ProducerSwitchCommand, nodeIds: String): TopicSwitchData = {
     var topicSwitchData: TopicSwitchData = null
-    var targetNodes: List[Node] = getClusterManager.getNode(Arrays.asList(nodeIds))
+    var targetNodes: Set[Node] = getClusterManager.listNodes(Arrays.asList(nodeIds))
 
     if (targetNodes != null && !targetNodes.isEmpty) {
-      var node = targetNodes.get(0)
+      var node = targetNodes.toArray(new Array[Node](0))(0)
       producerCommand.setDestination(targetNodes)
       var map = getExecutionContext.execute[ProducerSwitchResult, ProducerSwitchCommand](producerCommand)
       if (map != null || !map.isEmpty) {

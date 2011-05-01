@@ -1,11 +1,11 @@
 package net.cellar.console.pages
 
 import org.apache.wicket.markup.html.panel.Panel
-import net.cellar.console.CellarSupport
+import net.cellar.console.CellarConsoleSupport
 import net.cellar.console.domain.HandlerData
 import net.cellar.core.control.{ManageHandlersResult, ManageHandlersCommand}
 import net.cellar.core.Node
-import java.util.{List, LinkedList, Arrays}
+import java.util.{Set, List, LinkedList, Arrays}
 import org.apache.wicket.markup.html.form.Form
 import org.apache.wicket.markup.html.WebMarkupContainer
 import org.apache.wicket.markup.html.list.{ListItem, ListView}
@@ -18,7 +18,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton
  * @author: iocanel
  */
 
-class ListNodeHandlersPanel(var wicketId: String, var model: IModel[String]) extends Panel(wicketId, model) with CellarSupport {
+class ListNodeHandlersPanel(var wicketId: String, var model: IModel[String]) extends Panel(wicketId, model) with CellarConsoleSupport {
 
   def this(wicketId: String) = this (wicketId, new Model[String]())
 
@@ -35,7 +35,7 @@ class ListNodeHandlersPanel(var wicketId: String, var model: IModel[String]) ext
         def onSubmit(target: AjaxRequestTarget, form: Form[_]) {
           var handlersCommand = new ManageHandlersCommand(getClusterManager.generateId)
           handlersCommand.setHandlesName(item.getModelObject.getName)
-          handlersCommand.setDestination(getClusterManager.getNode(Arrays.asList(id)))
+          handlersCommand.setDestination(getClusterManager.listNodes(Arrays.asList(id)))
           handlersCommand.setStatus(true)
           executeHandlersCommand(handlersCommand, id)
           container.detach
@@ -46,7 +46,7 @@ class ListNodeHandlersPanel(var wicketId: String, var model: IModel[String]) ext
         def onSubmit(target: AjaxRequestTarget, form: Form[_]) {
           var handlersCommand = new ManageHandlersCommand(getClusterManager.generateId)
           handlersCommand.setHandlesName(item.getModelObject.getName)
-          handlersCommand.setDestination(getClusterManager.getNode(Arrays.asList(id)))
+          handlersCommand.setDestination(getClusterManager.listNodes(Arrays.asList(id)))
           handlersCommand.setStatus(false)
           executeHandlersCommand(handlersCommand, id)
           container.detach
@@ -79,10 +79,10 @@ class ListNodeHandlersPanel(var wicketId: String, var model: IModel[String]) ext
    */
   def executeHandlersCommand(handlersCommand: ManageHandlersCommand, nodeIds: String): List[HandlerData] = {
     var handlerDataList: List[HandlerData] = new LinkedList[HandlerData]
-    var targetNodes: List[Node] = getClusterManager.getNode(Arrays.asList(nodeIds))
+    var targetNodes: Set[Node] = getClusterManager.listNodes(Arrays.asList(nodeIds))
 
     if (targetNodes != null && !targetNodes.isEmpty) {
-      var node = targetNodes.get(0)
+      var node = targetNodes.toArray(new Array[Node](0))(0)
       handlersCommand.setDestination(targetNodes)
       var map = getExecutionContext.execute[ManageHandlersResult, ManageHandlersCommand](handlersCommand)
       if (map != null && !map.isEmpty) {

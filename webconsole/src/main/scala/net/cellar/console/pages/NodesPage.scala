@@ -1,6 +1,5 @@
 package net.cellar.console.pages
 
-import java.util.List
 import org.apache.wicket.behavior.AttributeAppender
 import org.apache.wicket.markup.html.list.{ListItem, ListView}
 import net.cellar.core.Node
@@ -8,6 +7,7 @@ import org.apache.wicket.model.{CompoundPropertyModel, LoadableDetachableModel, 
 import org.apache.wicket.markup.html.basic.Label
 import org.apache.wicket.PageParameters
 import org.apache.wicket.markup.html.form.{Form, Button}
+import java.util.{LinkedList, List}
 
 /**
  * @author iocanel
@@ -45,7 +45,7 @@ class NodesPage extends BasePage {
     new LoadableDetachableModel[List[Node]]() {
       def load() = {
         var clusterManager = getClusterManager()
-        clusterManager.getNodes()
+        new LinkedList(clusterManager.listNodes())
       }
     }
   }

@@ -3,13 +3,13 @@ package net.cellar.console.pages
 import org.apache.wicket.markup.html.WebPage
 import org.apache.wicket.markup.html.link.BookmarkablePageLink
 import scala.Predef._
-import net.cellar.console.CellarSupport
+import net.cellar.console.CellarConsoleSupport
 
 /**
  * @author iocanel
  */
 
-class BasePage extends WebPage with CellarSupport {
+class BasePage extends WebPage with CellarConsoleSupport {
 
   def homePageLink = new BookmarkablePageLink("homePageLink", classOf[HomePage])
 
