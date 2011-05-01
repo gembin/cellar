@@ -52,8 +52,6 @@ public class HazelcastGroupManager implements GroupManager, BundleContextAware {
 
 
     public void init() throws Exception {
-
-
         //Add group to configuration
         try {
             Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
@@ -83,11 +81,13 @@ public class HazelcastGroupManager implements GroupManager, BundleContextAware {
 
     @Override
     public Group createGroup(String groupName) {
-        Group group = new Group(groupName);
+        Group group = listGroups().get(groupName);
+        if (group == null)
+            group = new Group(groupName);
         if (!listGroups().containsKey(groupName)) {
             copyGroupConfiguration(Configurations.DEFAULT_GROUP_NAME, groupName);
+            listGroups().put(groupName, group);
         }
-        listGroups().put(groupName, group);
         return group;
     }
 
@@ -278,7 +278,10 @@ public class HazelcastGroupManager implements GroupManager, BundleContextAware {
 
     @Override
     public void registerGroup(String groupName) {
-        registerGroup(new Group(groupName));
+        Group group = listGroups().get(groupName);
+        if (group == null)
+            group = new Group(groupName);
+        registerGroup(group);
     }
 
     @Override
