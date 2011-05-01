@@ -1,5 +1,8 @@
 Cellar
 --------
+Build & Install Video: http://www.youtube.com/watch?v=EM_5fh6XA1M
+Basic Features Video: http://www.youtube.com/watch?v=HfNrTp371LA
+--------
 1. Requirements
 
 Karaf: 2.x
@@ -7,13 +10,7 @@ Java: 1.6
 Maven 2.2.1 or above.
 
 2. Build instructions
-Cellar requires the hazelcast trunk to work (it can works with the latest release 1.9.1 but it will lack some features like the web console).
-
-#svn checkout http://hazelcast.googlecode.com/svn/trunk/ hazelcast
-#cd hazelcast
-#mvn clean install
-
-and now you download % can build cellar:
+Cellar requires the hazelcast 1.9.3-RC (available in public repos).
 
 #git clone git@github.com:iocanel/cellar.git cellar
 #cd cellar
@@ -28,7 +25,8 @@ karaf@root>features:install cellar
 
 
 4. Testing the installation
-karaf@root>cluster:list
+karaf@root>cluster:list-nodes
 The above will list all the nodes that currently participate to the cluster.
 
-You can read more at http://iocanel.blogspot.com/2011/03/karaf-clustering-using-hazelcast.html
+
+You can read more at http://iocanel.blogspot.com/2011/03/karaf-clustering-using-hazelcast.html (its a bit out of date).
