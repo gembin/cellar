@@ -1,8 +1,10 @@
 package net.cellar.config;
 
-import net.cellar.core.ClusterManager;
-import net.cellar.core.event.EventBlocking;
+import net.cellar.core.Configurations;
+import net.cellar.core.Group;
+import net.cellar.core.Node;
 import net.cellar.core.event.EventProducer;
+import net.cellar.core.event.EventType;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -11,81 +13,95 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author: iocanel
  */
 public class LocalConfigurationListener extends ConfigurationSupport implements ConfigurationListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(LocalConfigurationListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocalConfigurationListener.class);
 
-	private EventProducer producer;
-	private ConfigurationTracker tracker;
-	private ClusterManager clusterManager;
+    private List<EventProducer> producerList;
 
-	private Map<String, Properties> configurationTable;
+    private Node node;
 
-	/**
-	 * Handle local configuration events.
-	 * If the event is a pending event stop it. Else broadcast it to the cluster.
-	 *
-	 * @param event
-	 */
-	public void configurationEvent(ConfigurationEvent event) {
-		String pid = event.getPid();
-		//Check if the pid is marked as local.
-		if (!isBlocked(pid, EventBlocking.OUTBOUND)) {
-			RemoteConfigurationEvent configurationEvent = new RemoteConfigurationEvent(pid);
-			push(pid);
-			if (!tracker.isPending(configurationEvent)) {
-				producer.produce(configurationEvent);
-			} else tracker.stop(configurationEvent);
-		} else logger.debug("Configuration with pid {} is marked as local.",pid);
-	}
+    /**
+     * Handle local configuration events.
+     * If the event is a pending event stop it. Else broadcast it to the cluster.
+     *
+     * @param event
+     */
+    public void configurationEvent(ConfigurationEvent event) {
+        String pid = event.getPid();
 
-	/**
-	 * Push configuration with pid to the table.
-	 *
-	 * @param pid
-	 */
-	protected void push(String pid) {
-		Map<String, Properties> configurationTable = clusterManager.getMap(Constants.CONFIGURATION_MAP);
-		try {
-			Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
-			for (Configuration configuration : configurations) {
-				Properties properties = dictionaryToProperties(configuration.getProperties());
-				configurationTable.put(configuration.getPid(), properties);
-			}
-		} catch (IOException e) {
-			logger.error("Failed to push configuration with pid:" + pid, e);
-		} catch (InvalidSyntaxException e) {
-			logger.error("Failed to retrieve configuration with pid:" + pid, e);
-		}
-	}
+        Set<Group> groups = groupManager.listLocalGroups();
 
-	public EventProducer getProducer() {
-		return producer;
-	}
+        if (groups != null && !groups.isEmpty()) {
+            for (Group group : groups) {
+                //Check if the pid is allowed for outbound.
+                if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                    RemoteConfigurationEvent configurationEvent = new RemoteConfigurationEvent(pid);
+                    configurationEvent.setSourceGroup(group);
+                    configurationEvent.setSourceNode(node);
+                    push(pid, group);
+                    if (producerList != null && !producerList.isEmpty()) {
+                        for (EventProducer producer : producerList) {
+                            producer.produce(configurationEvent);
+                        }
+                    }
+                } else logger.debug("Configuration with pid {} is marked as local.", pid);
+            }
+        }
+    }
 
-	public void setProducer(EventProducer producer) {
-		this.producer = producer;
-	}
+    /**
+     * Push configuration with pid to the table.
+     *
+     * @param pid
+     */
 
-	public ConfigurationTracker getTracker() {
-		return tracker;
-	}
+    protected void push(String pid, Group group) {
+        String groupName = group.getName();
 
-	public void setTracker(ConfigurationTracker tracker) {
-		this.tracker = tracker;
-	}
+        Map<String, Properties> configurationTable = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        try {
+            Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
+            for (Configuration configuration : configurations) {
+                Properties properties = dictionaryToProperties(preparePush(filterDictionary(configuration.getProperties())));
+                configurationTable.put(configuration.getPid(), properties);
+            }
+        } catch (IOException e) {
+            logger.error("Failed to push configuration with pid:" + pid, e);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Failed to retrieve configuration with pid:" + pid, e);
+        }
+    }
 
-	public ClusterManager getClusterManager() {
-		return clusterManager;
-	}
+    /**
+     * Initialization Method.
+     */
+    public void init() {
+        if (clusterManager != null) {
+            node = clusterManager.getNode();
+        }
+    }
 
-	public void setClusterManager(ClusterManager clusterManager) {
-		this.clusterManager = clusterManager;
-	}
+    /**
+     * Destruction Method.
+     */
+    public void destroy() {
+
+    }
+
+    public List<EventProducer> getProducerList() {
+        return producerList;
+    }
+
+    public void setProducerList(List<EventProducer> producerList) {
+        this.producerList = producerList;
+    }
 }

@@ -34,6 +34,7 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <!-- Configuration Admin -->
         <dependency>
             <groupId>org.apache.felix</groupId>

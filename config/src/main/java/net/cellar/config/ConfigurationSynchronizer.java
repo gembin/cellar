@@ -1,142 +1,183 @@
 package net.cellar.config;
 
-import net.cellar.core.ClusterManager;
-import net.cellar.core.event.EventBlocking;
+import net.cellar.core.Configurations;
+import net.cellar.core.Group;
+import net.cellar.core.Synchronizer;
 import net.cellar.core.event.EventProducer;
+import net.cellar.core.event.EventType;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author iocanel
  */
-public class ConfigurationSynchronizer extends ConfigurationSupport {
+public class ConfigurationSynchronizer extends ConfigurationSupport implements Synchronizer {
 
-	private static Logger logger = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
+    private static Logger logger = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
 
-	private EventProducer producer;
-	private ClusterManager clusterManager;
-	private Map<String, Properties> configurationTable;
+    private List<EventProducer> producerList;
 
-	/**
-	 * Constructor
-	 */
-	public ConfigurationSynchronizer() {
-	}
+    /**
+     * Constructor
+     */
+    public ConfigurationSynchronizer() {
+    }
 
-	/**
-	 * Registration method
-	 */
-	public void init() {
-		if (clusterManager != null) {
-			configurationTable = clusterManager.getMap(Constants.CONFIGURATION_MAP);
-		}
-		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-		try {
-			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-			pull();
-			push();
-		} finally {
-			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-		}
-	}
+    /**
+     * Registration method
+     */
+    public void init() {
+        Set<Group> groups = groupManager.listLocalGroups();
+        if (groups != null && !groups.isEmpty()) {
+            for (Group group : groups) {
+                if (isSyncEnabled(group)) {
+                    pull(group);
+                    push(group);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Destruction method
-	 */
-	public void destroy() {
+    /**
+     * Destruction method
+     */
+    public void destroy() {
 
-	}
+    }
 
-	/**
-	 * Reads the configuration from the remote map.
-	 */
-	public void pull() {
-		for (String pid : configurationTable.keySet()) {
-			//Check if the pid is marked as local.
-			if (!isBlocked(pid, EventBlocking.INBOUND)) {
-				Properties dictionary = configurationTable.get(pid);
-				try {
-					Configuration conf = configurationAdmin.getConfiguration(pid);
-					//Update the configuration.
-					if (conf != null) {
-						//Mark the remote configuration event.
-						RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
-						conf.update(dictionary);
-					}
-				} catch (IOException ex) {
-					logger.error("Failed to read remote configuration", ex);
-				}
-			}
-		}
-	}
+    /**
+     * Reads the configuration from the remote map.
+     */
+    public void pull(Group group) {
+        if (group != null) {
+            String groupName = group.getName();
+            Map<String, Properties> configurationTable = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
-	/**
-	 * Publishses local configuration to the cluster.
-	 */
-	public void push() {
-		Configuration[] configs;
-		try {
-			configs = configurationAdmin.listConfigurations(null);
-			for (Configuration conf : configs) {
-				String pid = conf.getPid();
-				//Check if the pid is marked as local.
-				if (!isBlocked(pid, EventBlocking.OUTBOUND)) {
-					Properties source = dictionaryToProperties(conf.getProperties());
-					Properties target = configurationTable.get(pid);
-					if (target != null) {
-						boolean requiresUpdate = false;
-						if (source != null && source.keys() != null) {
-							Enumeration keys = source.keys();
-							while (keys.hasMoreElements()) {
-								String key = (String) keys.nextElement();
-								if (target.get(key) == null || target.get(key).equals(source.get(key))) {
-									requiresUpdate = true;
-									target.put(key, source.get(key));
-								}
-							}
-							configurationTable.put(pid, target);
-							if (requiresUpdate) {
-								RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
-								producer.produce(event);
-							}
-							logger.info("Publishing PID:" + pid);
-						}
-					} else {
-						RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
-						configurationTable.put(pid, source);
-						producer.produce(event);
-						logger.info("Publishing PID:" + pid);
-					}
-				}
-			}
-		} catch (IOException ex) {
-			logger.error("Failed to read remote configuration, due to I/O error:", ex);
-		} catch (InvalidSyntaxException ex) {
-			logger.error("Failed to read remote configuration, due to invalid filter syntax:", ex);
-		}
-	}
+            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
+                for (String pid : configurationTable.keySet()) {
+                    //Check if the pid is marked as local.
+                    if (isAllowed(group, Constants.CATEGORY, pid, EventType.INBOUND)) {
+                        Properties dictionary = configurationTable.get(pid);
+                        try {
+                            Configuration conf = configurationAdmin.getConfiguration(pid);
+                            //Update the configuration.
+                            if (conf != null) {
+                                //Mark the remote configuration event.
+                                RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
+                                conf.update(preparePull(dictionary));
+                            }
+                        } catch (IOException ex) {
+                            logger.error("Failed to read remote configuration", ex);
+                        }
+                    }
+                }
+            } finally {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
+            }
+        }
+    }
 
-	public EventProducer getProducer() {
-		return producer;
-	}
+    /**
+     * Publishses local configuration to the cluster.
+     */
+    public void push(Group group) {
+        if (group != null) {
+            String groupName = group.getName();
+            Map<String, Properties> configurationTable = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
-	public void setProducer(EventProducer producer) {
-		this.producer = producer;
-	}
+            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                Configuration[] configs;
+                try {
+                    configs = configurationAdmin.listConfigurations(null);
+                    for (Configuration conf : configs) {
+                        String pid = conf.getPid();
+                        //Check if the pid is marked as local.
+                        if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                            Properties source = dictionaryToProperties(preparePush(filterDictionary(conf.getProperties())));
+                            Properties target = configurationTable.get(pid);
+                            if (target != null) {
+                                boolean requiresUpdate = false;
+                                if (source != null && source.keys() != null) {
+                                    Enumeration keys = source.keys();
+                                    while (keys.hasMoreElements()) {
+                                        String key = (String) keys.nextElement();
+                                        if (target.get(key) == null || target.get(key).equals(source.get(key))) {
+                                            requiresUpdate = true;
+                                            target.put(key, source.get(key));
+                                        }
+                                    }
+                                    configurationTable.put(pid, target);
+                                    if (requiresUpdate) {
+                                        RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
+                                        if (producerList != null && !producerList.isEmpty()) {
+                                            for (EventProducer producer : producerList) {
+                                                producer.produce(event);
+                                            }
+                                        }
 
-	public ClusterManager getClusterManager() {
-		return clusterManager;
-	}
+                                    }
+                                    logger.info("Publishing PID:" + pid);
+                                }
+                            } else {
+                                RemoteConfigurationEvent event = new RemoteConfigurationEvent(conf.getPid());
+                                configurationTable.put(pid, source);
+                                if (producerList != null && !producerList.isEmpty()) {
+                                    for (EventProducer producer : producerList) {
+                                        producer.produce(event);
+                                    }
+                                }
+                                logger.info("Publishing PID:" + pid);
+                            }
+                        }
+                    }
+                } catch (IOException ex) {
+                    logger.error("Failed to read remote configuration, due to I/O error:", ex);
+                } catch (InvalidSyntaxException ex) {
+                    logger.error("Failed to read remote configuration, due to invalid filter syntax:", ex);
+                }
+            } finally {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
+            }
+        }
+    }
 
-	public void setClusterManager(ClusterManager clusterManager) {
-		this.clusterManager = clusterManager;
-	}
+    @Override
+    public Boolean isSyncEnabled(Group group) {
+        Boolean result = Boolean.FALSE;
+        String groupName = group.getName();
+
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP);
+            Dictionary<String, String> properties = configuration.getProperties();
+            String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+            String propertyValue = properties.get(propertyKey);
+            result = Boolean.parseBoolean(propertyValue);
+        } catch (IOException e) {
+            logger.error("Error while checking if sync is enabled.", e);
+        }
+        return result;
+    }
+
+    public List<EventProducer> getProducerList() {
+        return producerList;
+    }
+
+    public void setProducerList(List<EventProducer> producerList) {
+        this.producerList = producerList;
+    }
 }

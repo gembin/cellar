@@ -3,40 +3,42 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <!-- Cluster Configuration Listener -->
-    <bean id="configurationListener" class="net.cellar.config.LocalConfigurationListener">
-        <property name="tracker" ref="tracker"/>
-        <property name="producer" ref="eventProducer"/>
+    <bean id="configurationListener" class="net.cellar.config.LocalConfigurationListener" init-method="init"
+          destroy-method="destroy">
+        <property name="producerList" ref="groupEventProducers"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
-
-    <!-- Configuration Tracker -->
-    <bean id="tracker" class="net.cellar.config.ConfigurationTracker"/>
 
     <!-- Configuration Synchronizer -->
     <bean id="synchronizer" class="net.cellar.config.ConfigurationSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
         <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="producer" ref="eventProducer"/>
+        <property name="producerList" ref="groupEventProducers"/>
     </bean>
 
     <bean id="eventHandler" class="net.cellar.config.ConfigurationEventHandler"
           init-method="init" destroy-method="destroy">
-        <property name="tracker" ref="tracker"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="clusterManager" ref="clusterManager"/>
     </bean>
 
     <!-- OSGi Services  & References -->
     <service ref="configurationListener" interface="org.osgi.service.cm.ConfigurationListener"/>
+    <service ref="synchronizer" interface="net.cellar.core.Synchronizer"/>
     <service ref="eventHandler" interface="net.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
-         </service-properties>
+        </service-properties>
     </service>
+
     <reference id="clusterManager" interface="net.cellar.core.ClusterManager"/>
-    <reference id="eventProducer" interface="net.cellar.core.event.EventProducer"/>
+    <reference id="groupManager" interface="net.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference-list id="groupEventProducers" member-type="service-object"
+                    interface="net.cellar.core.event.EventProducer" filter="(type=group)"/>
 
 </blueprint>
